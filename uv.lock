@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12, <3.14"
 
 [[package]]
@@ -87,10 +87,12 @@ name = "cs336-basics"
 version = "26.0.0"
 source = { editable = "." }
 dependencies = [
+    { name = "debugpy" },
     { name = "einops" },
     { name = "einx" },
     { name = "jaxtyping" },
     { name = "numpy" },
+    { name = "pip" },
     { name = "psutil" },
     { name = "pytest" },
     { name = "pytest-timeout" },
@@ -105,10 +107,12 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "debugpy", specifier = ">=1.8.22" },
     { name = "einops", specifier = ">=0.8" },
     { name = "einx", specifier = ">=0.4" },
     { name = "jaxtyping", specifier = ">=0.3" },
     { name = "numpy", specifier = ">=2.4" },
+    { name = "pip", specifier = ">=26.3" },
     { name = "psutil", specifier = ">=7" },
     { name = "pytest", specifier = ">=9.0" },
     { name = "pytest-timeout" },
@@ -153,37 +157,54 @@ wheels = [
 
 [package.optional-dependencies]
 cublas = [
-    { name = "nvidia-cublas", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cublas" },
 ]
 cudart = [
-    { name = "nvidia-cuda-runtime", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cuda-runtime" },
 ]
 cufft = [
-    { name = "nvidia-cufft", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cufft" },
 ]
 cufile = [
-    { name = "nvidia-cufile", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cufile" },
 ]
 cupti = [
-    { name = "nvidia-cuda-cupti", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cuda-cupti" },
 ]
 curand = [
-    { name = "nvidia-curand", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-curand" },
 ]
 cusolver = [
-    { name = "nvidia-cusolver", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cusolver" },
 ]
 cusparse = [
-    { name = "nvidia-cusparse", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cusparse" },
 ]
 nvjitlink = [
-    { name = "nvidia-nvjitlink", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-nvjitlink" },
 ]
 nvrtc = [
-    { name = "nvidia-cuda-nvrtc", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cuda-nvrtc" },
 ]
 nvtx = [
-    { name = "nvidia-nvtx", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-nvtx" },
+]
+
+[[package]]
+name = "debugpy"
+version = "1.8.22"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/9d/3cb6693342acf96802dba89934a5b8da43c201d764ebd1f2c0514a3d42bd/debugpy-1.8.22.tar.gz", hash = "sha256:e489c7268e1c7b41e13b438d9c533d2a7af73fb59bf8cd30fead8286c1c39c4e", size = 1710877, upload-time = "2026-09-15T21:44:02.578Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/73/21/5c7f5c66eaeee57c9dadb0bbff22efddc8d99cdbd3d036c806175f1828cc/debugpy-1.8.22-cp312-cp312-macosx_15_0_universal2.whl", hash = "sha256:4ad076f4f66cb8acb79e4384d48b1ea60a0b1957aa0b1112d4887ea3a4df60e0", size = 2499375, upload-time = "2026-09-15T21:44:18.478Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/ec/7389798843643ea5bc6a08480ba1b855377c70e2ed90189c0a03594e401e/debugpy-1.8.22-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:8a697acec45dbc70d17fb5d9f4f61989fc294d273c69de487fd10cb35fdd75eb", size = 4000941, upload-time = "2026-09-15T21:44:20.245Z" },
+    { url = "https://files.pythonhosted.org/packages/20/f4/64ce7a2499550929e08654360b270409eeda3e321b7c27027d9c919aa36b/debugpy-1.8.22-cp312-cp312-win32.whl", hash = "sha256:12bc7f368182b517cf26c76a2393fff65354e365fa1552b6241e66edff17997b", size = 5359040, upload-time = "2026-09-15T21:44:22.218Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/fe/e7d3b72874cdd327bda295d1995a01e426857ae9cbaaba74fd997bc3afbc/debugpy-1.8.22-cp312-cp312-win_amd64.whl", hash = "sha256:371a4ba4a5975eb958393903f3254cf983da7b1c7c178b3f987ee427f42515e3", size = 5398304, upload-time = "2026-09-15T21:44:24.119Z" },
+    { url = "https://files.pythonhosted.org/packages/6b/f4/fee6d40f5865aa84e1100c9df1a0f2cf8991776b61f11f433ff277df4415/debugpy-1.8.22-cp313-cp313-macosx_15_0_universal2.whl", hash = "sha256:c21dd7e1ec22556bb41dc3bf6b86c603e440ec889c4acb27d7206354b2106c54", size = 2493531, upload-time = "2026-09-15T21:44:25.835Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/4f/8df91270afbf61fc5ab202951f28451194a7eb093704b26da11cb0ecd308/debugpy-1.8.22-cp313-cp313-manylinux_2_34_x86_64.whl", hash = "sha256:c1ffb9953708b648ecf6acd2e5ad2c002bf68785ed618197dd4463a2a7226f39", size = 3994351, upload-time = "2026-09-15T21:44:27.31Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/11/2e34a4f21d6155b0c58003fd6fca9819df7d6fe7d7acd83b146b648a57ee/debugpy-1.8.22-cp313-cp313-win32.whl", hash = "sha256:ba810a66b437e3c43ca0ce0892404f010338286263ca8e5108442d76a9485337", size = 5359071, upload-time = "2026-09-15T21:44:29.064Z" },
+    { url = "https://files.pythonhosted.org/packages/d0/f5/c2b3e8260388d7b76bc4e5a3a29648a0ca47dca6a2721d6549ff2d944eee/debugpy-1.8.22-cp313-cp313-win_amd64.whl", hash = "sha256:f49b1d6cecf326b63c06d7f517e4a6642777f758c58cb799e7bc5a6dd74721c2", size = 5400362, upload-time = "2026-09-15T21:44:30.857Z" },
+    { url = "https://files.pythonhosted.org/packages/56/3d/c7dc9f35bc9e22cdb53679f844bee40fd5cff871862f60595869a433400d/debugpy-1.8.22-py2.py3-none-any.whl", hash = "sha256:a9e9d3550e15ca479c59333e90845029190531f0cacfedab3b815a57bd913947", size = 5374857, upload-time = "2026-09-15T21:44:54.454Z" },
 ]
 
 [[package]]
@@ -557,6 +578,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz", hash = "sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4", size = 143416, upload-time = "2026-01-21T20:50:39.064Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/b9/c538f279a4e237a006a2c98387d081e9eb060d203d8ed34467cc0f0b9b53/packaging-26.0-py3-none-any.whl", hash = "sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529", size = 74366, upload-time = "2026-01-21T20:50:37.788Z" },
+]
+
+[[package]]
+name = "pip"
+version = "26.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/53/c7/f8d9e2e0e7c1ed8a22a10eeb3b5bf7860bc07d8446c7a978a882c5c8214b/pip-26.3.tar.gz", hash = "sha256:6c36ae7da8695be67e3cd9f7d87919667ced53f57ce2ede75d89b5912ed2bc4c", size = 1934348, upload-time = "2026-11-02T20:34:27.738Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/07/25/ee8c38ae72d66b844ce8eb9711ba905dba21ca1a8a0c960057c41cd23337/pip-26.3-py3-none-any.whl", hash = "sha256:f3b60b20ffaadd4415ed7957212a38ac63fa4c5fa375bd0f4a797777940fad13", size = 1950951, upload-time = "2026-11-02T20:34:25.728Z" },
 ]
 
 [[package]]
