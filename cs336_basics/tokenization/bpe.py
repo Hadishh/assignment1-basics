@@ -7,6 +7,7 @@ from cs336_basics.tokenization.pretokenization import (
     pre_tokenize_file,
     pre_tokenize_text,
 )
+import heapq
 
 
 class BPETrainer:
@@ -157,6 +158,11 @@ class Tokenizer:
         self.vocab = vocab
         self.tok2ind = {value: key for key, value in vocab.items()}
         self.merges = merges
+        self.merge2idx = dict()
+        for i in range(len(merges)):
+            merge = merges[i]
+            merge = (self.tok2ind[merge[0]], self.tok2ind[merge[1]])
+            self.merge2idx[merge] = i
         self.special_tokens = special_tokens
 
     def from_files(
@@ -176,20 +182,54 @@ class Tokenizer:
                 continue
 
             word = [self.tok2ind[bytes((t,))] for t in word]
-            for t1, t2 in self.merges:
-                tok = t1 + t2
-                t1 = self.tok2ind[t1]
-                t2 = self.tok2ind[t2]
-                temp_word = []
+            merges_in_word = set()
+            heap = []
+            for i in range(len(word) - 1):
+                merge = (word[i], word[i + 1])
+                if merge not in merges_in_word and merge in self.merge2idx:
+                    merges_in_word.add(merge)
+                    heap.append((self.merge2idx[merge], merge))
+
+            heapq.heapify(heap)
+
+            while heap:
+                rank, merge = heapq.heappop(heap)
+                new_tokens = []
+                tok = self.vocab[merge[0]] + self.vocab[merge[1]]
+                additions = set()
                 i = 0
                 while i < len(word):
-                    if i < len(word) - 1 and (word[i], word[i + 1]) == (t1, t2):
-                        temp_word.append(self.tok2ind[tok])
+                    if i < len(word) - 1 and (word[i], word[i + 1]) == merge:
+                        if len(new_tokens) > 0:
+                            additions.add((len(new_tokens) - 1, len(new_tokens)))
+                        new_tokens.append(self.tok2ind[tok])
                         i += 2
+                        if i < len(word):
+                            additions.add((len(new_tokens) - 1, len(new_tokens)))
                     else:
-                        temp_word.append(word[i])
+                        new_tokens.append(word[i])
                         i += 1
-                word = tuple(temp_word)
+                word = new_tokens
+                for i, j in additions:
+                    new_merge = (word[i], word[j])
+                    if new_merge in self.merge2idx:
+                        heapq.heappush(heap, (self.merge2idx[new_merge], new_merge))
+
+            # for t1, t2 in self.merges:
+            #     tok = t1 + t2
+            #     t1 = self.tok2ind[t1]
+            #     t2 = self.tok2ind[t2]
+            #     temp_word = []
+            #     i = 0
+            #     while i < len(word):
+            #         if i < len(word) - 1 and (word[i], word[i + 1]) == (t1, t2):
+            #             temp_word.append(self.tok2ind[tok])
+            #             i += 2
+            #         else:
+            #             temp_word.append(word[i])
+            #             i += 1
+            #     word = tuple(temp_word)
+
             tokens.extend(word)
         return tokens
 
@@ -221,6 +261,9 @@ class Tokenizer:
 
 if __name__ == "__main__":
 
+    from tests.test_tokenizer import test_ascii_string_matches_tiktoken
+
+    test_ascii_string_matches_tiktoken()
     parser = ArgumentParser()
 
     parser.add_argument("--input_path", required=True)
