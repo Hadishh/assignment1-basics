@@ -452,7 +452,9 @@ def run_cross_entropy(
     raise NotImplementedError
 
 
-def run_gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm: float) -> None:
+def run_gradient_clipping(
+    parameters: Iterable[torch.nn.Parameter], max_l2_norm: float
+) -> None:
     """Given a set of parameters, clip their combined gradients to have l2 norm at most max_l2_norm.
 
     Args:
@@ -559,7 +561,9 @@ def get_tokenizer(
     Returns:
         A BPE tokenizer that uses the provided vocab, merges, and special tokens.
     """
-    raise NotImplementedError
+    from cs336_basics.tokenization.bpe import Tokenizer
+
+    return Tokenizer(vocab, merges, special_tokens)
 
 
 def run_train_bpe(
@@ -590,8 +594,8 @@ def run_train_bpe(
                 Merges are ordered by order of creation.
     """
 
-    from cs336_basics.tokenization.bpe import Tokenizer
+    from cs336_basics.tokenization.bpe import BPETrainer
 
-    tokenizer = Tokenizer(vocab_size, special_tokens, num_processors=4)
+    tokenizer = BPETrainer(vocab_size, special_tokens, num_processors=4)
     tokenizer.train(input_path)
     return tokenizer.vocab, tokenizer.merges
