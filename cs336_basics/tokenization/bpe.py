@@ -215,21 +215,6 @@ class Tokenizer:
                     if new_merge in self.merge2idx:
                         heapq.heappush(heap, (self.merge2idx[new_merge], new_merge))
 
-            # for t1, t2 in self.merges:
-            #     tok = t1 + t2
-            #     t1 = self.tok2ind[t1]
-            #     t2 = self.tok2ind[t2]
-            #     temp_word = []
-            #     i = 0
-            #     while i < len(word):
-            #         if i < len(word) - 1 and (word[i], word[i + 1]) == (t1, t2):
-            #             temp_word.append(self.tok2ind[tok])
-            #             i += 2
-            #         else:
-            #             temp_word.append(word[i])
-            #             i += 1
-            #     word = tuple(temp_word)
-
             tokens.extend(word)
         return tokens
 
