@@ -31,7 +31,7 @@ def run_linear(
     from cs336_basics.nn.linear import Linear
 
     linear = Linear(in_features=d_in, out_features=d_out)
-    linear.load_state_dict({"w": weights})
+    linear.load_state_dict({"weight": weights})
 
     return linear(in_features)
 
@@ -58,7 +58,7 @@ def run_embedding(
 
     emb = Embedding(num_embeddings=vocab_size, embedding_dim=d_model)
 
-    emb.load_state_dict({"w": weights})
+    emb.load_state_dict({"weight": weights})
 
     return emb(token_ids)
 
@@ -96,7 +96,9 @@ def run_swiglu(
 
     swiglu = SwiGLU(d_model=d_model, d_ff=d_ff)
 
-    swiglu.load_state_dict({"l1.w": w1_weight, "l2.w": w2_weight, "l3.w": w3_weight})
+    swiglu.load_state_dict(
+        {"w1.weight": w1_weight, "w2.weight": w2_weight, "w3.weight": w3_weight}
+    )
     return swiglu(in_features)
 
 
@@ -161,10 +163,10 @@ def run_multihead_self_attention(
 
     attn.load_state_dict(
         {
-            "lq.w": q_proj_weight,
-            "lk.w": k_proj_weight,
-            "lo.w": o_proj_weight,
-            "lv.w": v_proj_weight,
+            "q_proj.weight": q_proj_weight,
+            "k_proj.weight": k_proj_weight,
+            "output_proj.weight": o_proj_weight,
+            "v_proj.weight": v_proj_weight,
         }
     )
     return attn(in_features)
@@ -218,10 +220,10 @@ def run_multihead_self_attention_with_rope(
 
     attn.load_state_dict(
         {
-            "lq.w": q_proj_weight,
-            "lk.w": k_proj_weight,
-            "lo.w": o_proj_weight,
-            "lv.w": v_proj_weight,
+            "q_proj.weight": q_proj_weight,
+            "k_proj.weight": k_proj_weight,
+            "output_proj.weight": o_proj_weight,
+            "v_proj.weight": v_proj_weight,
         }
     )
     return attn(in_features)
@@ -324,6 +326,21 @@ def run_transformer_block(
         Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
         running the Transformer block on the input features while using RoPE.
     """
+
+    from cs336_basics.nn.transformer import TransformerBlock
+    from cs336_basics.nn.embedding import RotaryPositionalembedding
+
+    rope = RotaryPositionalembedding(
+        d_k=d_model // num_heads, theta=theta, max_seq_len=max_seq_len
+    )
+
+    transformer = TransformerBlock(
+        num_heads=num_heads, d_model=d_model, d_ff=d_ff, pos_emb=rope
+    )
+
+    transformer.load_state_dict(weights)
+
+    return transformer(in_features)
     raise NotImplementedError
 
 

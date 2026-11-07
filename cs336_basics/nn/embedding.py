@@ -17,7 +17,7 @@ class Embedding(torch.nn.Module):
         )
         torch.nn.init.trunc_normal_(embedding, mean=0, std=1, a=-3, b=3)
 
-        self.w = torch.nn.Parameter(
+        self.weight = torch.nn.Parameter(
             data=embedding,
         )
 

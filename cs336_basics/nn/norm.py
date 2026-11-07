@@ -14,7 +14,9 @@ class RMSNorm(torch.nn.Module):
 
         self.eps = eps
         self.d_model = d_model
-        self.g = torch.nn.Parameter(torch.ones((d_model), device=device, dtype=dtype))
+        self.weight = torch.nn.Parameter(
+            torch.ones((d_model), device=device, dtype=dtype)
+        )
 
     def forward(self, a: torch.Tensor) -> torch.Tensor:
         in_type = a.dtype
@@ -33,7 +35,7 @@ class RMSNorm(torch.nn.Module):
 
         rmsnorm = einops.einsum(
             a,
-            self.g,
+            self.weight,
             "... d_model, d_model -> ... d_model",
         )
         rmsnorm = rmsnorm / rms

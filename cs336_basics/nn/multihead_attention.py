@@ -18,28 +18,28 @@ class MultiHeadAttention(torch.nn.Module):
         self.dv = d_model // num_heads
 
         self.pos_emb = pos_emb
-        self.lk = Linear(
+        self.k_proj = Linear(
             in_features=d_model,
             out_features=self.dk * num_heads,
             device=device,
             dtype=dtype,
         )
 
-        self.lq = Linear(
+        self.q_proj = Linear(
             in_features=d_model,
             out_features=num_heads * self.dk,
             device=device,
             dtype=dtype,
         )
 
-        self.lv = Linear(
+        self.v_proj = Linear(
             in_features=d_model,
             out_features=self.dv * num_heads,
             device=device,
             dtype=dtype,
         )
 
-        self.lo = Linear(
+        self.output_proj = Linear(
             in_features=num_heads * self.dv,
             out_features=d_model,
             device=device,
@@ -53,9 +53,9 @@ class MultiHeadAttention(torch.nn.Module):
             tensor of shape " ... sequence_length d_model"
         """
         seq_len = x.shape[-2]
-        Q = self.lq(x)
-        K = self.lk(x)
-        V = self.lv(x)
+        Q = self.q_proj(x)
+        K = self.k_proj(x)
+        V = self.v_proj(x)
 
         Q = einops.rearrange(
             Q, "... seq_len (n dq) -> ... n seq_len dq", n=self.num_heads
@@ -83,5 +83,5 @@ class MultiHeadAttention(torch.nn.Module):
         attn = einops.rearrange(
             attn, "... n seq_len dv -> ... seq_len (n dv)", n=self.num_heads
         )
-        o_proj = self.lo(attn)
+        o_proj = self.output_proj(attn)
         return o_proj
