@@ -57,6 +57,6 @@ class RotaryPositionalembedding(torch.nn.Module):
     def forward(self, x: torch.Tensor, token_positionts: torch.Tensor) -> torch.Tensor:
         R = self.R[token_positionts]
         x = einops.rearrange(x, "... seq_len (k p) -> ... seq_len k p", p=2)
-        x = einops.einsum(R, x, "seq_len k l p, ... seq_len k p -> ... seq_len k l")
+        x = einops.einsum(R, x, "... seq_len k l p, ... seq_len k p -> ... seq_len k l")
         x = einops.rearrange(x, "... seq_len k p -> ... seq_len (k p)")
         return x
