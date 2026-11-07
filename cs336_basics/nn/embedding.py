@@ -22,7 +22,7 @@ class Embedding(torch.nn.Module):
         )
 
     def forward(self, token_ids: torch.Tensor) -> torch.Tensor:
-        return self.w[token_ids]
+        return self.weight[token_ids]
 
 
 class RotaryPositionalembedding(torch.nn.Module):
