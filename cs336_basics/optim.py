@@ -1,4 +1,5 @@
 from collections.abc import Callable, Iterable
+from cs336_basics.lr_scheduler import LRScheduler
 from typing import Optional
 import torch
 import math
@@ -27,10 +28,19 @@ class SGD(torch.optim.Optimizer):
 
 
 class AdamW(torch.optim.Optimizer):
-    def __init__(self, params, lr, betas, weight_decay, eps=1e-8):
+    def __init__(
+        self,
+        params,
+        lr,
+        betas,
+        weight_decay,
+        eps=1e-8,
+        scheulder: LRScheduler | None = None,
+    ):
         if lr < 0:
             raise ValueError(f"Invalid learning rate: {lr}")
 
+        self.scheduler = scheulder
         defaults = {
             "lr": lr,
             "betas": betas,
@@ -55,6 +65,9 @@ class AdamW(torch.optim.Optimizer):
 
                 state = self.state[p]
                 t = state.get("t", 1)
+                if self.scheduler:
+                    lr = self.scheduler.calculate(t)
+
                 m = state.get("m", torch.zeros_like(p.data))
                 v = state.get("v", torch.zeros_like(p.data))
 
