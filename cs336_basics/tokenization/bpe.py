@@ -1,5 +1,6 @@
 import os
 from typing import List, Dict, Tuple, Iterator
+from typing_extensions import Self
 from argparse import ArgumentParser
 import pickle
 from tqdm import tqdm
@@ -8,6 +9,7 @@ from cs336_basics.tokenization.pretokenization import (
     pre_tokenize_text,
 )
 import heapq
+import numpy as np
 
 
 class BPETrainer:
@@ -154,6 +156,7 @@ class Tokenizer:
         vocab: Dict[int, bytes],
         merges: List[Tuple[bytes, bytes]],
         special_tokens: List[str] | None = None,
+        stop_token: str = "<|endoftext|>",
     ):
         self.vocab = vocab
         self.tok2ind = {value: key for key, value in vocab.items()}
@@ -164,14 +167,29 @@ class Tokenizer:
             merge = (self.tok2ind[merge[0]], self.tok2ind[merge[1]])
             self.merge2idx[merge] = i
         self.special_tokens = special_tokens
+        self.STOP_TOKEN = stop_token.encode("utf-8")
+        self.STOP_TOKEN_ID = self.tok2ind[self.STOP_TOKEN]
 
     def from_files(
         cls,
         vocab_filepath: str | os.PathLike,
         merges_filepath: str | os.PathLike,
         special_tokens: List[str] | None = None,
-    ):
-        raise NotImplementedError()
+        stop_token: str = "<|endoftext|>",
+    ) -> Self:
+
+        with open(vocab_filepath, "rb") as f:
+            vocab = pickle.load(f)
+
+        with open(merges_filepath, "rb") as f:
+            merges = pickle.load(f)
+
+        return cls(
+            vocab=vocab,
+            merges=merges,
+            special_tokens=special_tokens,
+            stop_token=stop_token,
+        )
 
     def encode(self, text: str) -> List[int]:
         pre_tokens = pre_tokenize_text(text, special_tokens=self.special_tokens)
@@ -246,27 +264,47 @@ class Tokenizer:
 
 if __name__ == "__main__":
 
-    from tests.test_tokenizer import test_ascii_string_matches_tiktoken
-
-    test_ascii_string_matches_tiktoken()
     parser = ArgumentParser()
 
     parser.add_argument("--input_path", required=True)
+    parser.add_argument("--encode", action="store_true")
     parser.add_argument("--nproc", type=int, default=4)
     parser.add_argument("--vocab_size", type=int, default=500)
-    parser.add_argument("--output_dir", required=True)
+    parser.add_argument("--vocab_path", type=str, default=None)
+    parser.add_argument("--merges_path", type=str, default=None)
+    parser.add_argument("--output", required=True)
+    parser.add_argument("--stop_token", type=str, default="<|endoftext|>")
     parser.add_argument(
         "--special_tokens", nargs="*", type=str, default=["<|endoftext|>"]
     )
 
     args = parser.parse_args()
 
-    print(
-        f"[Tokenizer] Training tokenizer with {args.vocab_size} vocabs, and special tokens {args.special_tokens}"
-    )
-    tokenizer = BPETrainer(
-        args.vocab_size, args.special_tokens, num_processors=args.nproc, pbar=True
-    )
-    tokenizer.train(args.input_path)
-    os.makedirs(args.output_dir, exist_ok=True)
-    tokenizer.save_tokenizer(args.output_dir)
+    if args.encode:
+
+        tokenizer = Tokenizer.from_files(
+            vocab_filepath=args.vocab_path,
+            merges_filepath=args.merges_path,
+            special_tokens=args.special_tokens,
+            stop_token=args.stop_token,
+        )
+
+        token_ids = []
+        print(f"[Tokenizer] Encoding: {args.input_path}")
+        with open(args.input_path) as f:
+            for _id in tokenizer.encode_iterable(f):
+                token_ids.append(_id)
+
+        with open(args.output, "wb") as f:
+            np.save(file=f, arr=np.array(token_ids))
+            print("[Tokenizer] Saved encoded data to: ", args.output)
+    else:
+        print(
+            f"[Tokenizer] Training tokenizer with {args.vocab_size} vocabs, and special tokens {args.special_tokens}"
+        )
+        tokenizer = BPETrainer(
+            args.vocab_size, args.special_tokens, num_processors=args.nproc, pbar=True
+        )
+        tokenizer.train(args.input_path)
+        os.makedirs(args.output, exist_ok=True)
+        tokenizer.save_tokenizer(args.output)
