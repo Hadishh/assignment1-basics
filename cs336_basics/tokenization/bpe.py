@@ -10,6 +10,7 @@ from cs336_basics.tokenization.pretokenization import (
 )
 import heapq
 import numpy as np
+from pathlib import Path
 
 
 class BPETrainer:
@@ -170,6 +171,7 @@ class Tokenizer:
         self.STOP_TOKEN = stop_token.encode("utf-8")
         self.STOP_TOKEN_ID = self.tok2ind[self.STOP_TOKEN]
 
+    @classmethod
     def from_files(
         cls,
         vocab_filepath: str | os.PathLike,
@@ -292,8 +294,14 @@ if __name__ == "__main__":
         token_ids = []
         print(f"[Tokenizer] Encoding: {args.input_path}")
         with open(args.input_path) as f:
-            for _id in tokenizer.encode_iterable(f):
+            for _id in tqdm(
+                tokenizer.encode_iterable(f),
+                desc="Encoding",
+                unit="token",
+            ):
                 token_ids.append(_id)
+
+        os.makedirs(Path(args.output).parent, exist_ok=True)
 
         with open(args.output, "wb") as f:
             np.save(file=f, arr=np.array(token_ids))
