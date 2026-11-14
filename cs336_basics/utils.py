@@ -3,6 +3,37 @@ import torch
 import math
 import os
 import typing
+import yaml
+
+
+def load_yaml(argparser):
+    pre_args, _ = argparser.parse_known_args()
+
+    if pre_args.config:
+        with open(pre_args.config, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+
+        if config is None:
+            config = {}
+
+        if not isinstance(config, dict):
+            argparser.error("Config must contain a YAML mapping.")
+
+        # Catch misspelled or unsupported config keys.
+        unknown = config.keys() - vars(pre_args).keys()
+        if unknown:
+            argparser.error(f"Unknown config keys: {list(unknown)}")
+
+        argparser.set_defaults(**config)
+
+    # Second pass: explicit CLI arguments override YAML defaults.
+    args = argparser.parse_args()
+
+    for name in ("training_dset", "output_dir"):
+        if getattr(args, name) is None:
+            argparser.error(f"Provide {name} in YAML or through --{name}.")
+
+    return args
 
 
 def lr_cosine_schedule(t, alpha_max, alpha_min, t_w, t_c):
@@ -29,6 +60,8 @@ def gradient_clipping(params: Iterable[torch.nn.Parameter], M: float, eps=1e-6):
     if M < l2_norm:
         for g in grads:
             g.mul_(M / (eps + l2_norm))
+
+    return l2_norm
 
 
 def save_checkpoint(

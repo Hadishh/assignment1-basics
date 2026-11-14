@@ -32,10 +32,11 @@ class RotaryPositionalembedding(torch.nn.Module):
         d_k: int,
         max_seq_len: int,
         device: torch.device | None = None,
+        dtype: torch.dtype | None = None,
     ):
         super().__init__()
 
-        self.theta = torch.Tensor([theta], device=device)
+        self.theta = torch.tensor([theta], device=device)
         self.d_k = d_k
 
         I = torch.arange(end=max_seq_len, device=device)
@@ -45,7 +46,7 @@ class RotaryPositionalembedding(torch.nn.Module):
             I, denominator, "max_seq_len, half_d -> max_seq_len half_d"
         )
 
-        R = torch.zeros((max_seq_len, d_k // 2, 2, 2))
+        R = torch.zeros((max_seq_len, d_k // 2, 2, 2), device=device, dtype=dtype)
 
         R[:, :, 0, 0] = torch.cos(theta_i_k)
         R[:, :, 0, 1] = -torch.sin(theta_i_k)

@@ -36,6 +36,7 @@ class TranformerLM(torch.nn.Module):
             d_k=d_model // num_heads,
             max_seq_len=context_length,
             device=device,
+            dtype=dtype,
         )
 
         self.layers = torch.nn.ModuleList(
