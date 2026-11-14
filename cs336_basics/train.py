@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 def validation(args, model: torch.nn.Module, dset: np.ndarray, device="cpu"):
     rng = np.random.default_rng(args.seed)
 
-    total_loss = 0
+    loss_sum = 0
     num_tokens = 0
-    for _ in args.valid_iters:
+    for _ in range(args.valid_iters):
         x, y = data_loading(
             dset,
             batch_size=args.batch_size,
@@ -165,6 +165,7 @@ def train(
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
 
+    argparser.add_argument("--seed", default=6556, type=int)
     argparser.add_argument("--vocab_size", default=50_257, type=int)
     argparser.add_argument("--context_length", default=1024, type=int)
     argparser.add_argument("--num_layers", default=48, type=int)
@@ -192,6 +193,7 @@ if __name__ == "__main__":
     argparser.add_argument("--validation_dset", default=None)
     argparser.add_argument("--save_every", default=-1, type=int)
     argparser.add_argument("--validate_every", default=-1, type=int)
+    argparser.add_argument("--valid_iters", default=100, type=int)
 
     argparser.add_argument("--wandb_project", default="cs336")
     argparser.add_argument("--wandb_name", default=None)

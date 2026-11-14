@@ -1,0 +1,32 @@
+training_dset: results/tinystories_tokenized/train.npy
+validation_dset: results/tinystories_tokenized/valid.npy
+output_dir: results/training/ts_baseline/
+
+vocab_size: 10000
+context_length: 256
+num_layers: 4
+d_model: 512
+nheads: 16
+d_ff: 1344
+rope_theta: 10000.0
+
+batch_size: 64
+max_iters: 20000
+# max_iters: 102
+clip_norm: 5.0
+
+weight_decay: 0.1
+lr_schedule: cosine
+lr_schedule_cosince_cycle: 14500
+lr_warmup: 500
+lr_min: 1e-4
+lr_max: 1e-3
+
+device: cuda
+dtype: bfloat16
+save_every: 5000
+validate_every: 500
+valid_iters: 500
+log_every: 10
+
+wandb_project: cs336-hadi/assignment1
