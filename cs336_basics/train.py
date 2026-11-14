@@ -14,8 +14,35 @@ import math
 import logging
 import sys
 from pathlib import Path
+from cs336_basics.decoding import decode
 
 logger = logging.getLogger(__name__)
+
+
+def validation(args, model: torch.nn.Module, dset: np.ndarray, device="cpu"):
+    rng = np.random.default_rng(args.seed)
+
+    total_loss = 0
+    num_tokens = 0
+    for _ in args.valid_iters:
+        x, y = data_loading(
+            dset,
+            batch_size=args.batch_size,
+            context_length=args.context_length,
+            device=device,
+            rng=rng,
+        )
+        y_hat = model(x)
+
+        loss = cross_entropy_loss(y_hat, y)
+
+        loss_sum += loss.detach().item() * y.numel()  # per-token avg loss
+        num_tokens += y.numel()
+
+    avg_loss = loss_sum / num_tokens
+    perprexity = math.exp(avg_loss)
+
+    return {"valid/loss": avg_loss, "valid/ppl": perprexity}
 
 
 def train(
@@ -32,7 +59,7 @@ def train(
     # train_dset = np.load(args.training_dset, mmap_mode="r")
     train_dset = np.random.random_integers(low=1, high=1024, size=(1_000_000,))
     if args.validation_dset:
-        valid_set = np.load(args.validation_dset, mmap_mode="r")
+        valid_dset = np.load(args.validation_dset, mmap_mode="r")
 
     if args.load_ckpt:
         iter = utils.load_checkpoint(args.load_ckpt)
@@ -64,7 +91,7 @@ def train(
 
         loss = cross_entropy_loss(y_hat, y)
 
-        loss_sum += loss.detach().item()
+        loss_sum += loss.detach().item() * y.numel()  # per-token avg loss
         num_batch += 1
         num_tokens += y.numel()
 
@@ -78,20 +105,34 @@ def train(
             "train/gnorm": gnorm.item(),
         }
 
+        if (
+            args.validate_every > 0
+            and iter % args.validate_every == 0
+            and args.validation_dset is not None
+        ):
+            validation_results = validation(args, model, valid_dset, device=device)
+            metrics.update(validation_results)
+
+            logger.info(
+                "[Validation ] loss=%.4f | ppl=%.2f",
+                validation_results["valid/loss"],
+                validation_results["valid/ppl"],
+            )
+
         if iter % args.log_every == 0 or iter + 1 >= args.max_iters:
             now = time.perf_counter()
             elapsed_minutes = (now - start_time) / 60
             tokens_per_second = num_tokens / (now - interval_start)
 
-            avg_loss = loss_sum / num_batch
-            perplexity = math.exp(avg_loss)
+            avg_loss = loss_sum / num_tokens
+            perplexity = math.exp(avg_loss)  # per-token perplexity
 
             metrics.update(
                 {
                     "train/elapsed_minutes": elapsed_minutes,
                     "train/loss": avg_loss,
                     "train/loss_vs_time": avg_loss,
-                    "train/perplexity": perplexity,
+                    "train/ppl": perplexity,
                     "train/tokens_per_second": tokens_per_second,
                 }
             )
@@ -221,8 +262,9 @@ if __name__ == "__main__":
             ],
         )
         run.define_metric("train/loss", step_metric="train/step")
-        run.define_metric("train/loss_vs_time", step_metric="train/elapsed_minutes")
-        run.define_metric("train/perplexity", step_metric="train/step")
+        run.define_metric("train/ppl", step_metric="train/step")
         run.define_metric("train/gnorm", step_metric="train/step")
+        run.define_metric("valid/loss", step_metric="train/step")
+        run.define_metric("valid/ppl", step_metric="train/step")
 
         train(args, model, optimizer, device=device, run=run)

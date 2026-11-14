@@ -3,13 +3,13 @@ import einops
 import math
 
 
-def softmax(v: torch.Tensor, dim: int) -> torch.Tensor:
+def softmax(v: torch.Tensor, dim: int, tau: float = 1) -> torch.Tensor:
     max_ = torch.amax(v, dim=dim, keepdim=True)
 
     v = v - max_
-    sum_ = torch.sum(torch.exp(v), dim=dim, keepdim=True)
+    sum_ = torch.sum(torch.exp(v / tau), dim=dim, keepdim=True)
 
-    v = torch.exp(v) / sum_
+    v = torch.exp(v / tau) / sum_
 
     return v
 
