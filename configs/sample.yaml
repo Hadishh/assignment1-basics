@@ -1,0 +1,28 @@
+training_dset: data/train.npy
+# validation_dset: data/valid.npy
+output_dir: checkpoints
+
+vocab_size: 50257
+context_length: 128
+num_layers: 1
+d_model: 768
+nheads: 1
+d_ff: 2048
+rope_theta: 10000.0
+
+batch_size: 2
+max_iters: 10000
+clip_norm: 1.0
+
+lr_schedule: cosine
+lr_schedule_cosince_cycle: 10000
+lr_warmup: 1000
+lr_min: 0.00001
+lr_max: 0.0001
+
+device: cuda
+dtype: bfloat16
+save_every: -1
+log_every: 10
+
+wandb_project: cs336-hadi/assignment1
