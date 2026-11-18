@@ -57,6 +57,8 @@ def train(
     interval_start = start_time
 
     train_dset = np.load(args.training_dset, mmap_mode="r")
+    train_rng = np.random.default_rng(args.seed)
+
     if args.validation_dset:
         valid_dset = np.load(args.validation_dset, mmap_mode="r")
 
@@ -84,17 +86,18 @@ def train(
             batch_size=args.batch_size,
             context_length=args.context_length,
             device=device,
+            rng=train_rng,
         )
 
         y_hat = model(x)
 
         loss = cross_entropy_loss(y_hat, y)
 
-        loss_sum += loss.detach().item() * y.numel()  # per-token avg loss
-        num_batch += 1
+        loss_sum += loss.detach().item() * y.numel()
         num_tokens += y.numel()
 
         loss.backward()
+
         gnorm = utils.gradient_clipping(model.parameters(), args.clip_norm)
 
         optimizer.step()
