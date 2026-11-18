@@ -26,7 +26,7 @@ device: cuda
 dtype: bfloat16
 save_every: 5000
 validate_every: 500
-valid_iters: 500
+valid_iters: 20
 log_every: 10
 
 wandb_project: cs336-hadi/assignment1
