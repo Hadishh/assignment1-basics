@@ -56,8 +56,7 @@ def train(
     start_time = time.perf_counter()
     interval_start = start_time
 
-    # train_dset = np.load(args.training_dset, mmap_mode="r")
-    train_dset = np.random.random_integers(low=1, high=1024, size=(1_000_000,))
+    train_dset = np.load(args.training_dset, mmap_mode="r")
     if args.validation_dset:
         valid_dset = np.load(args.validation_dset, mmap_mode="r")
 
@@ -71,7 +70,7 @@ def train(
         device,
         next(model.parameters()).dtype,
         f"{sum(p.numel() for p in model.parameters()):,}",
-        f"{train_dset.size:,}",
+        f"{args.batch_size * args.context_length * args.max_iters:,}",
     )
     loss_sum = 0
     num_batch = 0
