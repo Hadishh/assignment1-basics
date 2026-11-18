@@ -109,7 +109,12 @@ def train(
             and iter % args.validate_every == 0
             and args.validation_dset is not None
         ):
-            validation_results = validation(args, model, valid_dset, device=device)
+            if device.type == "cuda":
+                torch.cuda.synchronize(device)
+            validation_start = time.perf_counter()
+            model.eval()
+            with torch.no_grad():
+                validation_results = validation(args, model, valid_dset, device=device)
             metrics.update(validation_results)
 
             logger.info(
@@ -117,6 +122,10 @@ def train(
                 validation_results["valid/loss"],
                 validation_results["valid/ppl"],
             )
+            model.train()
+            if device.type == "cuda":
+                torch.cuda.synchronize(device)
+            interval_start += time.perf_counter() - validation_start
 
         if iter % args.log_every == 0 or iter + 1 >= args.max_iters:
             now = time.perf_counter()
